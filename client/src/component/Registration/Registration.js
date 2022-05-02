@@ -163,11 +163,12 @@ export default class Registration extends Component {
   
   registerAsVoter = async () => {
     console.log('registerAsVoter');
+    // window.alert(this.state.voterPhone);
     if (!this.state.currentVoter.isRegistered)
     {
       let code = Math.floor(1000 + Math.random() * 9000);
       await fetch('http://192.168.0.183:1234/send_mail?' + new URLSearchParams({
-      recipient: this.state.currentVoter.phone,
+      recipient: this.state.voterPhone,
       code:code,  
     })).catch(async () =>{await this.showAlert(code)}
     );  

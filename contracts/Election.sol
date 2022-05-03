@@ -7,6 +7,7 @@ contract Election {
     uint256 voterCount;
     bool start;
     bool end;
+    uint256 endTime;
 
     constructor() public {
         // Initilizing default val  ues
@@ -15,6 +16,7 @@ contract Election {
         voterCount = 0;
         start = false;
         end = false;
+        endTime = 0;
     }
 
     function getAdmin() public view returns (address) {
@@ -68,7 +70,8 @@ contract Election {
         string memory _adminEmail,
         string memory _adminTitle,
         string memory _electionTitle,
-        string memory _organizationTitle
+        string memory _organizationTitle,
+        uint256 _endTime
     )
         public
         // Only admin can add
@@ -83,6 +86,7 @@ contract Election {
         );
         start = true;
         end = false;
+        endTime = _endTime;
     }
 
     // Get Elections details
@@ -181,5 +185,9 @@ contract Election {
 
     function getEnd() public view returns (bool) {
         return end;
+    }
+
+    function getTimeLeft() public view returns (uint256) {
+        return endTime;
     }
 }

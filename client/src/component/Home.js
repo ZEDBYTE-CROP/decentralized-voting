@@ -18,6 +18,8 @@ import Election from "../contracts/Election.json";
 import "./Home.css";
 
 // const buttonRef = React.createRef();
+
+
 export default class Home extends Component {
   constructor(props) {
     super(props);
@@ -71,7 +73,7 @@ export default class Home extends Component {
       this.setState({ elStarted: start });
       const end = await this.state.ElectionInstance.methods.getEnd().call();
       this.setState({ elEnded: end });
-
+     
       // Getting election details from the contract
       const adminName = await this.state.ElectionInstance.methods
         .getAdminName()
@@ -98,6 +100,14 @@ export default class Home extends Component {
           organizationTitle: organizationTitle,
         },
       });
+      
+      if (this.state.elStarted)
+      {
+        const electionTime = await this.state.ElectionInstance.methods.getTimeLeft().call();
+        const timeOut = electionTime - new Date().getTime();
+        setTimeout(this.endElection,timeOut);
+     }
+     
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -106,26 +116,33 @@ export default class Home extends Component {
       console.error(error);
     }
   };
+
   // end election
   endElection = async () => {
+    window.alert("The election has been ended. Confirm the transaction to close it");
+    if(this.state.isAdmin)
+    {
     await this.state.ElectionInstance.methods
       .endElection()
       .send({ from: this.state.account, gas: 1000000 });
+    }
     window.location.reload();
   };
+
   // register and start election
   registerElection = async (data) => {
-    console.log("inside registration")
+    let time = new Date().getTime() + (parseInt(data.electionDuration) * 1000);
     await this.state.ElectionInstance.methods
       .setElectionDetails(
         data.adminFName.toLowerCase() + " " + data.adminLName.toLowerCase(),
         data.adminEmail.toLowerCase(),
         data.adminTitle.toLowerCase(),
         data.electionTitle.toLowerCase(),
-        data.organizationTitle.toLowerCase()
+        data.organizationTitle.toLowerCase(),
+        time
       )
       .send({ from: this.state.account, gas: 1000000 });
-    window.location.reload();
+   window.location.reload();
     
   };
 
@@ -291,6 +308,18 @@ export default class Home extends Component {
                           type="text"
                           placeholder="eg. Lifeline Academy"
                           {...register("organizationTitle", {
+                            required: true,
+                          })}
+                        />
+                      </label>
+                      <label className="label-home">
+                        Election duration{" "}
+                        {errors.electionDuration && <EMsg msg="*required" />}
+                        <input
+                          className="input-home"
+                          type="number"
+                          placeholder="eg. duration in seconds : 3600"
+                          {...register("electionDuration", {
                             required: true,
                           })}
                         />

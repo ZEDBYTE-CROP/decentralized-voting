@@ -78,6 +78,14 @@ export default class Voting extends Component {
       const end = await this.state.ElectionInstance.methods.getEnd().call();
       this.setState({ isElEnded: end });
 
+      if (this.state.isElStarted)
+      {
+        const electionTime = await this.state.ElectionInstance.methods.getTimeLeft().call();
+        const timeOut = electionTime - new Date().getTime();
+        setTimeout(()=>window.alert("Sorry you can't cast your vote election has been ended"),timeOut);
+        window.location.reload();
+     }
+
       // Loading Candidates details
       for (let i = 1; i <= this.state.candidateCount; i++) {
         const candidate = await this.state.ElectionInstance.methods

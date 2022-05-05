@@ -10,6 +10,8 @@ import UserHome from "./UserHome";
 import StartEnd from "./StartEnd";
 import ElectionStatus from "./ElectionStatus";
 
+import GetDisplayTime from "./Timer";
+
 // Contract
 import getWeb3 from "../getWeb3";
 import Election from "../contracts/Election.json";
@@ -31,6 +33,7 @@ export default class Home extends Component {
       elStarted: false,
       elEnded: false,
       elDetails: {},
+      timeOut: null,
     };
   }
 
@@ -90,7 +93,7 @@ export default class Home extends Component {
       const organizationTitle = await this.state.ElectionInstance.methods
         .getOrganizationTitle()
         .call();
-
+      
       this.setState({
         elDetails: {
           adminName: adminName,
@@ -104,8 +107,13 @@ export default class Home extends Component {
       if (this.state.elStarted)
       {
         const electionTime = await this.state.ElectionInstance.methods.getTimeLeft().call();
-        const timeOut = electionTime - new Date().getTime();
+        const timeOut =  electionTime - new Date().getTime();
         setTimeout(this.endElection,timeOut);
+        //display timer
+        this.setState({timeOut: GetDisplayTime((electionTime - new Date().getTime())/1000)}) // execute without delay for first time
+        setInterval(() => {
+          this.setState({timeOut: GetDisplayTime((electionTime - new Date().getTime())/1000)});
+        }, 1000);
      }
      
     } catch (error) {
@@ -145,12 +153,12 @@ export default class Home extends Component {
    window.location.reload();
     
   };
-
+    
   render() {
     if (!this.state.web3) {
       return (
         <>
-          <Navbar />
+          <Navbar/>
           <center>Loading Web3, accounts, and contract...</center>
         </>
       );
@@ -159,6 +167,7 @@ export default class Home extends Component {
       <>
         {this.state.isAdmin ? <NavbarAdmin /> : <Navbar />}
         <div className="container-main">
+        <center><strong>Time Left : {this.state.timeOut}</strong></center>
           <div className="container-item center-items info">
             Your Account: {this.state.account}
           </div>

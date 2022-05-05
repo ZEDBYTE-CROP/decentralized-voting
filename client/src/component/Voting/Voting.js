@@ -13,7 +13,7 @@ import Election from "../../contracts/Election.json";
 
 // CSS
 import "./Voting.css";
-
+import GetDisplayTime from "../Timer";
 export default class Voting extends Component {
   constructor(props) {
     super(props);
@@ -26,6 +26,7 @@ export default class Voting extends Component {
       candidates: [],
       isElStarted: false,
       isElEnded: false,
+      timeOut: null,
       currentVoter: {
         address: undefined,
         name: null,
@@ -83,7 +84,11 @@ export default class Voting extends Component {
         const electionTime = await this.state.ElectionInstance.methods.getTimeLeft().call();
         const timeOut = electionTime - new Date().getTime();
         setTimeout(()=>window.alert("Sorry you can't cast your vote election has been ended"),timeOut);
-        window.location.reload();
+        //display timer
+        this.setState({timeOut: GetDisplayTime((electionTime - new Date().getTime())/1000)}) // execute without delay for first time
+        setInterval(() => {
+          this.setState({timeOut: GetDisplayTime((electionTime - new Date().getTime())/1000)});
+        }, 1000);
      }
 
       // Loading Candidates details
@@ -187,6 +192,9 @@ export default class Voting extends Component {
             <NotInit />
           ) : this.state.isElStarted && !this.state.isElEnded ? (
             <>
+            <p></p>
+            <p></p>
+              <center><strong>Time Left : {this.state.timeOut}</strong></center>
               {this.state.currentVoter.isRegistered ? (
                 this.state.currentVoter.isVerified ? (
                   this.state.currentVoter.hasVoted ? (
